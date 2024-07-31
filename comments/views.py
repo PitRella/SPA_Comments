@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Comment
 from .forms import CommentForm
+from django.http import HttpResponse
 
 def comment_list(request):
     comments = Comment.objects.all()
@@ -13,4 +14,6 @@ def add_comment(request):
         if form.is_valid():
             form.save()
             return redirect('comment_list')
+        else:
+            return HttpResponse(f"Form errors: {form.errors}")
     return redirect('comment_list')
