@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Комментарии</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h1>Комментарии</h1>
+    <form method="post" action="{% url 'add_comment' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Добавить комментарий</button>
+    </form>
+    <hr>
+    <h2>Список комментариев</h2>
+    <div id="comments">
+        {% for comment in comments %}
+            <div class="comment">
+                <p><strong>{{ comment.username }}</strong> ({{ comment.email }})</p>
+                <p>{{ comment.text }}</p>
+                <p><em>{{ comment.created_at }}</em></p>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
