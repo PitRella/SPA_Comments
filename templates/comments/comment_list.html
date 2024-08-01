@@ -30,13 +30,31 @@
         </form>
     </div>
     <div id="comments">
-        {% for comment in comments %}
+        {% for comment in page_obj %}
             <div class="comment">
                 <p><strong>{{ comment.username }}</strong> ({{ comment.email }})</p>
                 <p>{{ comment.text }}</p>
                 <p><em>{{ comment.created_at }}</em></p>
             </div>
         {% endfor %}
+    </div>
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1&sort_by={{ sort_by }}&order={{ order }}">Первая</a>
+                <a href="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&order={{ order }}">Предыдущая</a>
+            {% endif %}
+
+            <span class="current">
+                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&order={{ order }}" class="active">Следующая</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}&sort_by={{ sort_by }}&order={{ order }}"class="active">Последняя</a>
+            {% endif %}
+        </span>
     </div>
 </body>
 </html>
