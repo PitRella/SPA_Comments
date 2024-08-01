@@ -1,16 +1,16 @@
 from django.shortcuts import render, redirect
 from .models import Comment
-from .forms import CommentForm
+from .forms import CaptchaCommentForm
 from django.http import HttpResponse
 
 def comment_list(request):
     comments = Comment.objects.all()
-    form = CommentForm()
+    form = CaptchaCommentForm()
     return render(request, 'comments/comment_list.html', {'comments': comments, 'form': form})
 
 def add_comment(request):
     if request.method == 'POST':
-        form = CommentForm(request.POST)
+        form = CaptchaCommentForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('comment_list')

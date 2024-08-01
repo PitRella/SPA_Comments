@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-!mggbg=86tg^0625z-*k6tgcla&nxy2vk-ez6sw&v^gl&n5qzf
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 
 # Application definition
 
@@ -35,8 +35,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'comments',
     'captcha',
+    'comments',
 ]
 
 MIDDLEWARE = [
@@ -50,7 +50,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'SPA_Comments.urls'
-
+CAPTCHA_TEST_MODE = False
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
