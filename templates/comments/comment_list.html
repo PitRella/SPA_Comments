@@ -6,14 +6,29 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
 </head>
 <body>
+
     <h1>Комментарии</h1>
-<form method="post" action="{% url 'add_comment' %}" class="comment-form">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="submit-button">Добавить комментарий</button>
-</form>
+    <form method="post" action="{% url 'add_comment' %}" class="comment-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="submit-button">Добавить комментарий</button>
+    </form>
     <hr>
     <h2>Список комментариев</h2>
+    <div>
+        <form method="get" action="">
+            <button type="submit" name="sort_by" value="username" {% if sort_by == 'username' %}class="active"{% endif %}>
+                Сортировать по имени пользователя
+            </button>
+            <button type="submit" name="sort_by" value="email" {% if sort_by == 'email' %}class="active"{% endif %}>
+                Сортировать по E-mail
+            </button>
+            <button type="submit" name="sort_by" value="created_at" {% if sort_by == 'created_at' %}class="active"{% endif %}>
+                Сортировать по дате добавления
+            </button>
+            <input type="hidden" name="order" value="{% if order == 'asc' %}desc{% else %}asc{% endif %}">
+        </form>
+    </div>
     <div id="comments">
         {% for comment in comments %}
             <div class="comment">

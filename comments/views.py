@@ -4,9 +4,16 @@ from .forms import CaptchaCommentForm
 from django.http import HttpResponse
 
 def comment_list(request):
-    comments = Comment.objects.all()
+    sort_by = request.GET.get('sort_by', 'created_at')
+    order = request.GET.get('order', 'desc')
+
+    if order == 'asc':
+        comments = Comment.objects.all().order_by(sort_by)
+    else:
+        comments = Comment.objects.all().order_by(f'-{sort_by}')
+
     form = CaptchaCommentForm()
-    return render(request, 'comments/comment_list.html', {'comments': comments, 'form': form})
+    return render(request, 'comments/comment_list.html', {'comments': comments, 'form': form, 'sort_by': sort_by, 'order': order})
 
 def add_comment(request):
     if request.method == 'POST':
