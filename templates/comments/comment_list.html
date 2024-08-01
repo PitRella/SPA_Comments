@@ -35,6 +35,26 @@
                 <p><strong>{{ comment.username }}</strong> ({{ comment.email }})</p>
                 <p>{{ comment.text }}</p>
                 <p><em>{{ comment.created_at }}</em></p>
+
+                <!-- Форма для добавления ответа -->
+                <form method="post" action="{% url 'add_reply' comment.id %}" class="reply-form">
+                    {% csrf_token %}
+                    {{ reply_form.as_p }}
+                    <button type="submit" class="submit-button">Ответить</button>
+                </form>
+
+                <!-- Отображение ответов -->
+                <div class="replies">
+                    {% for reply in comment.replies.all %}
+                        <div class="reply" style="margin-left: 20px;">
+                            <p><strong>{{ reply.username }}</strong> ({{ reply.email }})</p>
+                            <p>{{ reply.text }}</p>
+                            <p><em>{{ reply.created_at }}</em></p>
+                        </div>
+                    {% empty %}
+                        <p>Нет ответов</p>
+                    {% endfor %}
+                </div>
             </div>
         {% endfor %}
     </div>
@@ -52,7 +72,7 @@
 
             {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&order={{ order }}" class="active">Следующая</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}&sort_by={{ sort_by }}&order={{ order }}"class="active">Последняя</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}&sort_by={{ sort_by }}&order={{ order }}" class="active">Последняя</a>
             {% endif %}
         </span>
     </div>

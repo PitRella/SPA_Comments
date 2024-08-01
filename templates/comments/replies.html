@@ -1,0 +1,14 @@
+{% for reply in replies %}
+    <div class="reply" style="margin-left: 20px;">
+        <p><strong>{{ reply.username }}</strong> ({{ reply.email }})</p>
+        <p>{{ reply.text }}</p>
+        <p><em>{{ reply.created_at }}</em></p>
+        
+        <!-- Отображение ответов на ответ -->
+        <div class="replies">
+            {% include 'replies.html' with replies=reply.replies.all %}
+        </div>
+    </div>
+{% empty %}
+    <p>Нет ответов</p>
+{% endfor %}

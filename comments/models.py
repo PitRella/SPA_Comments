@@ -10,3 +10,14 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'{self.username} - {self.text[:20]}'
+
+class Reply(models.Model):
+    comment = models.ForeignKey(Comment, related_name='replies', on_delete=models.CASCADE)
+    username = models.CharField(max_length=100)
+    email = models.EmailField()
+    homepage = models.URLField(blank=True, null=True)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.username} - {self.text[:20]}'
