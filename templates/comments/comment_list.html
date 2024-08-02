@@ -33,9 +33,9 @@
         <div class="mb-3">
             <form method="get" action="">
                 <div class="btn-group" role="group">
-                    <a href="#" class="btn btn-primary" data-sort-by="username" data-current-order="{{ order }}">Сортировать по имени пользователя</a>
-                    <a href="#" class="btn btn-primary" data-sort-by="email" data-current-order="{{ order }}">Сортировать по E-mail</a>
-                    <a href="#" class="btn btn-primary" data-sort-by="created_at" data-current-order="{{ order }}">Сортировать по дате добавления</a>
+                    <a href="#" class="btn btn-primary" data-sort-by="username" data-current-order="{{ order|default:'desc' }}">Сортировать по имени пользователя</a>
+                    <a href="#" class="btn btn-primary" data-sort-by="email" data-current-order="{{ order|default:'desc' }}">Сортировать по E-mail</a>
+                    <a href="#" class="btn btn-primary" data-sort-by="created_at" data-current-order="{{ order|default:'desc' }}">Сортировать по дате добавления</a>
                 </div>
             </form>
         </div>
@@ -43,9 +43,9 @@
             {% for comment in page_obj %}
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">{{ comment.username }}</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ comment.email }}</h6>
-                        <p class="card-text">{{ comment.text }}</p>
+                        <h5 class="card-title">{{ comment.username|escape }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ comment.email|escape }}</h6>
+                        <p class="card-text">{{ comment.text|escape }}</p>
                         <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created_at }}</cite></footer>
 
                         <!-- Кнопка для отображения формы ответа -->
@@ -65,9 +65,9 @@
                             {% for reply in comment.replies.all %}
                                 <div class="card ms-3 mb-3">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ reply.username }}</h6>
-                                        <h6 class="card-subtitle mb-2 text-muted">{{ reply.email }}</h6>
-                                        <p class="card-text">{{ reply.text }}</p>
+                                        <h6 class="card-title">{{ reply.username|escape }}</h6>
+                                        <h6 class="card-subtitle mb-2 text-muted">{{ reply.email|escape }}</h6>
+                                        <p class="card-text">{{ reply.text|escape }}</p>
                                         <footer class="blockquote-footer"><cite title="Source Title">{{ reply.created_at }}</cite></footer>
                                     </div>
                                 </div>
