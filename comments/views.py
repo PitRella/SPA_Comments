@@ -4,7 +4,6 @@ from .forms import CaptchaCommentForm, ReplyForm
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 
-
 def comment_list(request):
     sort_by = request.GET.get('sort_by', 'created_at')
     order = request.GET.get('order', 'desc')  # Сортировка по умолчанию – убывание
