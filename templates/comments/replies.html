@@ -1,14 +1,27 @@
 {% for reply in replies %}
-    <div class="reply" style="margin-left: 20px;">
-        <p><strong>{{ reply.username }}</strong> ({{ reply.email }})</p>
-        <p>{{ reply.text }}</p>
-        <p><em>{{ reply.created_at }}</em></p>
-        
-        <!-- Отображение ответов на ответ -->
-        <div class="replies">
-            {% include 'replies.html' with replies=reply.replies.all %}
+    <div class="card mb-3 ms-3">
+        <div class="card-body">
+            <h6 class="card-title">{{ reply.username|escape }}</h6>
+            <h6 class="card-subtitle mb-2 text-muted">{{ reply.email|escape }}</h6>
+            <p class="card-text">{{ reply.text|safe }}</p>
+            <footer class="blockquote-footer"><cite title="Source Title">{{ reply.created_at }}</cite></footer>
+
+            <!-- Кнопка для отображения формы ответа -->
+            <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ reply.id }}')">Ответить</button>
+
+            <!-- Форма для добавления ответа -->
+            <div id="reply-form-{{ reply.id }}" class="reply-form mt-3" style="display: none;">
+                <form method="post" action="{% url 'add_reply' reply.id %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </form>
+            </div>
+
+            <!-- Рекурсивное отображение ответов -->
+            <div class="mt-3">
+                {% include 'comments/replies.html' with replies=reply.replies.all %}
+            </div>
         </div>
     </div>
-{% empty %}
-    <p>Нет ответов</p>
 {% endfor %}

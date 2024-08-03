@@ -23,8 +23,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('comments.urls')),
     path('add/', views.add_comment, name='add_comment'),
+    path('reply/<int:parent_id>/', views.add_reply, name='add_reply'),
 ]
+
 urlpatterns += [
     path('captcha/', include('captcha.urls')),
-
 ]

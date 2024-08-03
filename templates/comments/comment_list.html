@@ -47,62 +47,51 @@
         <hr>
         <h2>Список комментариев</h2>
         <div id="preview-section" class="mb-4"></div> <!-- Секция для предварительного просмотра -->
+
+        <!-- Рекурсивное отображение комментариев -->
         <div id="comments">
-    {% for comment in comments %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">{{ comment.username|escape }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ comment.email|escape }}</h6>
-                <p class="card-text">{{ comment.text|safe }}</p>
-                <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created_at }}</cite></footer>
+            {% for comment in comments %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ comment.username|escape }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ comment.email|escape }}</h6>
+                        <p class="card-text">{{ comment.text|safe }}</p>
+                        <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created_at }}</cite></footer>
 
-                <!-- Кнопка для отображения формы ответа -->
-                <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
+                        <!-- Кнопка для отображения формы ответа -->
+                        <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
 
-                <!-- Форма для добавления ответа -->
-                <div id="reply-form-{{ comment.id }}" class="reply-form mt-3">
-                    <form method="post" action="{% url 'add_reply' comment.id %}">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                        <button type="submit" class="btn btn-primary">Отправить</button>
-                    </form>
-                </div>
-
-                <!-- Отображение ответов -->
-                <div class="mt-3">
-                    {% for reply in comment.replies.all %}
-                        <div class="card ms-3 mb-3">
-                            <div class="card-body">
-                                <h6 class="card-title">{{ reply.username|escape }}</h6>
-                                <h6 class="card-subtitle mb-2 text-muted">{{ reply.email|escape }}</h6>
-                                <p class="card-text">{{ reply.text|safe }}</p>
-                                <footer class="blockquote-footer"><cite title="Source Title">{{ reply.created_at }}</cite></footer>
-                            </div>
+                        <!-- Форма для добавления ответа -->
+                        <div id="reply-form-{{ comment.id }}" class="reply-form mt-3">
+                            <form method="post" action="{% url 'add_reply' comment.id %}">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                <button type="submit" class="btn btn-primary">Отправить</button>
+                            </form>
                         </div>
-                    {% empty %}
-                        <p>Нет ответов</p>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    {% endfor %}
+
+                        <!-- Рекурсивное отображение ответов -->
+                        <div class="mt-3">
+    {% include 'comments/replies.html' with replies=comment.replies.all %}
 </div>
-
-
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
 
         <!-- Pagination -->
         <nav aria-label="Page navigation">
             <ul class="pagination">
-                {% if page_obj.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page=1&sort_by={{ sort_by }}&order={{ order }}">Первая</a></li>
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&sort_by={{ sort_by }}&order={{ order }}">Предыдущая</a></li>
+                {% if comments.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">Первая</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ comments.previous_page_number }}">Предыдущая</a></li>
                 {% endif %}
 
-                <li class="page-item disabled"><span class="page-link">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span></li>
+                <li class="page-item disabled"><span class="page-link">Страница {{ comments.number }} из {{ comments.paginator.num_pages }}</span></li>
 
-                {% if page_obj.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&sort_by={{ sort_by }}&order={{ order }}">Следующая</a></li>
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&sort_by={{ sort_by }}&order={{ order }}">Последняя</a></li>
+                {% if comments.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ comments.next_page_number }}">Следующая</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ comments.paginator.num_pages }}">Последняя</a></li>
                 {% endif %}
             </ul>
         </nav>
@@ -140,44 +129,28 @@
                     method: 'POST',
                     body: formData,
                     headers: {
-                        'X-CSRFToken': '{{ csrf_token }}'
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
                     }
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        previewSection.innerHTML = `
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">${data.username}</h5>
-                                    <h6 class="card-subtitle mb-2 text-muted">${data.email}</h6>
-                                    <p class="card-text">${data.text}</p>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        previewSection.innerHTML = `<p>${data.error}</p>`;
-                    }
+                    previewSection.innerHTML = data.preview;
                 });
             });
         });
 
         function toggleReplyForm(commentId) {
-    const replyForm = document.getElementById('reply-form-' + commentId);
-    if (replyForm) {
-        replyForm.style.display = replyForm.style.display === 'none' || replyForm.style.display === '' ? 'block' : 'none';
-    }
-}
+            const form = document.getElementById('reply-form-' + commentId);
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
 
         function addTag(tag) {
-            const textarea = document.querySelector('#id_text');
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const text = textarea.value;
-
-            textarea.value = text.substring(0, start) + tag + text.substring(start, end) + tag.replace('[', '[/') + text.substring(end);
-            textarea.focus();
-            textarea.setSelectionRange(end + tag.length, end + tag.length);
+            const commentText = document.getElementById('id_text');
+            commentText.value += tag;
         }
     </script>
 </body>
