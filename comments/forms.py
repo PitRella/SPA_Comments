@@ -1,4 +1,5 @@
 import bleach
+import html5lib
 from captcha.fields import CaptchaField
 from django import forms
 from .models import Comment, Reply
@@ -25,8 +26,17 @@ class CaptchaCommentForm(forms.ModelForm):
             value = cleaned_data.get(field)
             if value:
                 cleaned_value = bleach.clean(value, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+
+                # Validate with html5lib to check for closed tags
+                parser = html5lib.HTMLParser(strict=True)
+                try:
+                    parser.parseFragment(cleaned_value)
+                except html5lib.html5parser.ParseError:
+                    self.add_error(field, "Message contains improperly closed HTML tags.")
+
                 if cleaned_value != value:
                     self.add_error(field, "Message contains disallowed HTML tags or attributes.")
+
                 cleaned_data[field] = cleaned_value
 
         return cleaned_data
