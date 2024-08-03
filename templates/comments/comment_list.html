@@ -15,6 +15,12 @@
         .reply-form {
             display: none;
         }
+        .toolbar {
+            margin-bottom: 10px;
+        }
+        .toolbar button {
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -25,6 +31,15 @@
     <main class="container my-4">
         <form id="comment-form" method="post" action="{% url 'add_comment' %}" class="mb-4">
             {% csrf_token %}
+            
+            <!-- Toolbar for HTML tags -->
+            <div class="toolbar">
+                <button type="button" class="btn btn-outline-secondary" onclick="addTag('[i]')">[i]</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="addTag('[strong]')">[strong]</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="addTag('[code]')">[code]</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="addTag('[a href=\'\']')">[a]</button>
+            </div>
+
             {{ form.as_p }}
             <button type="button" class="btn btn-secondary" id="preview-button">Предварительный просмотр</button>
             <button type="submit" class="btn btn-success">Добавить комментарий</button>
@@ -158,6 +173,37 @@
             } else {
                 form.style.display = 'none';
             }
+        }
+
+        function addTag(tag) {
+            const textarea = document.querySelector('#id_text'); // Adjust based on your form field name
+            const selectionStart = textarea.selectionStart;
+            const selectionEnd = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(selectionStart, selectionEnd);
+
+            let openTag = tag;
+            let closeTag = '';
+            if (tag === '[i]') {
+                closeTag = '</i>';
+                openTag = '<i>';
+            } else if (tag === '[strong]') {
+                closeTag = '</strong>';
+                openTag = '<strong>';
+            } else if (tag === '[code]') {
+                closeTag = '</code>';
+                openTag = '<code>';
+            } else if (tag === '[a href=""]') {
+                const url = prompt("Enter URL:", "http://");
+                closeTag = '</a>';
+                openTag = `<a href="${url}">`;
+            }
+
+            const beforeText = textarea.value.substring(0, selectionStart);
+            const afterText = textarea.value.substring(selectionEnd);
+            textarea.value = `${beforeText}${openTag}${selectedText}${closeTag}${afterText}`;
+            textarea.focus();
+            textarea.selectionStart = selectionStart + openTag.length;
+            textarea.selectionEnd = selectionStart + openTag.length + selectedText.length;
         }
     </script>
 </body>
