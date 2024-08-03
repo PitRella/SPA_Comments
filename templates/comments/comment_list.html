@@ -47,6 +47,31 @@
         <hr>
         <h2>Список комментариев</h2>
         <div id="preview-section" class="mb-4"></div> <!-- Секция для предварительного просмотра -->
+        
+        <!-- Comments table -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="sortable" onclick="sortTable('username')">User Name</th>
+                    <th class="sortable" onclick="sortTable('email')">E-mail</th>
+                    <th class="sortable" onclick="sortTable('created_at')">Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for comment in comments %}
+                    <tr>
+                        <td>{{ comment.username|escape }}</td>
+                        <td>{{ comment.email|escape }}</td>
+                        <td>{{ comment.created_at }}</td>
+                        <td>
+                            <!-- Button to toggle reply form -->
+                            <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
         <!-- Рекурсивное отображение комментариев -->
         <div id="comments">
@@ -72,8 +97,8 @@
 
                         <!-- Рекурсивное отображение ответов -->
                         <div class="mt-3">
-    {% include 'comments/replies.html' with replies=comment.replies.all %}
-</div>
+                            {% include 'comments/replies.html' with replies=comment.replies.all %}
+                        </div>
                     </div>
                 </div>
             {% endfor %}
