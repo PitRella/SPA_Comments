@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+
 from .models import Comment, Reply
 from .forms import CaptchaCommentForm, ReplyForm
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.core.paginator import Paginator
 
 def comment_list(request):
@@ -59,3 +61,20 @@ def add_reply(request, comment_id):
             return HttpResponse(f"Form errors: {form.errors}")
 
     return redirect('comment_list')
+
+@csrf_exempt
+def preview_comment(request):
+    if request.method == 'POST':
+        form = CaptchaCommentForm(request.POST)
+        if form.is_valid():
+            data = {
+                'success': True,
+                'username': form.cleaned_data['username'],
+                'email': form.cleaned_data['email'],
+                'text': form.cleaned_data['text']
+            }
+            return JsonResponse(data)
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid form data'})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})

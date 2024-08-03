@@ -23,22 +23,15 @@
     </header>
 
     <main class="container my-4">
-        <form method="post" action="{% url 'add_comment' %}" class="mb-4">
+        <form id="comment-form" method="post" action="{% url 'add_comment' %}" class="mb-4">
             {% csrf_token %}
             {{ form.as_p }}
+            <button type="button" class="btn btn-secondary" id="preview-button">Предварительный просмотр</button>
             <button type="submit" class="btn btn-success">Добавить комментарий</button>
         </form>
         <hr>
         <h2>Список комментариев</h2>
-        <div class="mb-3">
-            <form method="get" action="">
-                <div class="btn-group" role="group">
-                    <a href="#" class="btn btn-primary" data-sort-by="username" data-current-order="{{ order|default:'desc' }}">Сортировать по имени пользователя</a>
-                    <a href="#" class="btn btn-primary" data-sort-by="email" data-current-order="{{ order|default:'desc' }}">Сортировать по E-mail</a>
-                    <a href="#" class="btn btn-primary" data-sort-by="created_at" data-current-order="{{ order|default:'desc' }}">Сортировать по дате добавления</a>
-                </div>
-            </form>
-        </div>
+        <div id="preview-section" class="mb-4"></div> <!-- Секция для предварительного просмотра -->
         <div id="comments">
             {% for comment in page_obj %}
                 <div class="card mb-3">
@@ -104,6 +97,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sortLinks = document.querySelectorAll('.btn-group .btn');
+            const previewButton = document.getElementById('preview-button');
+            const commentForm = document.getElementById('comment-form');
+            const previewSection = document.getElementById('preview-section');
 
             sortLinks.forEach(function(link) {
                 link.addEventListener('click', function(event) {
@@ -118,6 +114,39 @@
                     url.searchParams.set('order', newOrder);
 
                     window.location.href = url.toString();
+                });
+            });
+
+            previewButton.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                const formData = new FormData(commentForm);
+
+                fetch('{% url "preview_comment" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': commentForm.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        previewSection.innerHTML = `
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">${data.username}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">${data.email}</h6>
+                                    <p class="card-text">${data.text}</p>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        previewSection.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
                 });
             });
         });
