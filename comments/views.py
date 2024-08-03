@@ -7,11 +7,22 @@ from django.http import HttpResponse, JsonResponse
 from django.core.paginator import Paginator
 
 def comment_list(request):
-    sort_by = request.GET.get('sort', 'created_at')  # Default to sorting by created_at
-    if sort_by not in ['created_at', 'username', 'email']:  # Add other valid fields if needed
-        sort_by = 'created_at'
-    comments = Comment.objects.all().order_by(f'-{sort_by}')
-    return render(request, 'comments/comment_list.html', {'comments': comments})
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('comment_list')
+    else:
+        form = CommentForm()
+
+    comments_list = Comment.objects.all().order_by('-created_at')  # Используйте правильное поле для сортировки
+    paginator = Paginator(comments_list, 10)  # Показывать по 10 комментариев на странице
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'comments/comment_list.html', {'form': form, 'page_obj': page_obj})
+
 
 def add_comment(request):
     if request.method == 'POST':
