@@ -1,16 +1,16 @@
 {% for reply in replies %}
-    <div class="card mb-3 ms-3">
+    <div class="card mt-3">
         <div class="card-body">
-            <h6 class="card-title">{{ reply.username|escape }}</h6>
+            <h5 class="card-title">{{ reply.username|escape }}</h5>
             <h6 class="card-subtitle mb-2 text-muted">{{ reply.email|escape }}</h6>
             <p class="card-text">{{ reply.text|safe }}</p>
             <footer class="blockquote-footer"><cite title="Source Title">{{ reply.created_at }}</cite></footer>
-
+            
             <!-- Кнопка для отображения формы ответа -->
             <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ reply.id }}')">Ответить</button>
 
             <!-- Форма для добавления ответа -->
-            <div id="reply-form-{{ reply.id }}" class="reply-form mt-3" style="display: none;">
+            <div id="reply-form-{{ reply.id }}" class="reply-form mt-3">
                 <form method="post" action="{% url 'add_reply' reply.id %}">
                     {% csrf_token %}
                     {{ form.as_p }}
@@ -24,4 +24,6 @@
             </div>
         </div>
     </div>
+{% empty %}
+    <p>Нет ответов</p>
 {% endfor %}

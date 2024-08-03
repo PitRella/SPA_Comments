@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from .models import Comment
 from .forms import CommentForm
-from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
+
 
 def comment_list(request):
     if request.method == 'POST':
@@ -13,8 +14,14 @@ def comment_list(request):
     else:
         form = CommentForm()
 
-    # Получаем все корневые комментарии
-    comments = Comment.objects.filter(parent__isnull=True).order_by('-created_at')
+    # Handle sorting
+    sort_by = request.GET.get('sort_by', 'created_at')
+    order = request.GET.get('order', 'desc')
+    if order == 'asc':
+        sort_by = f'-{sort_by}'
+
+    # Get all root comments
+    comments = Comment.objects.filter(parent__isnull=True).order_by(sort_by)
     return render(request, 'comments/comment_list.html', {'form': form, 'comments': comments})
 
 def add_reply(request, parent_id):
@@ -26,7 +33,6 @@ def add_reply(request, parent_id):
             reply.save()
             return redirect('comment_list')
         else:
-            # Отладочная информация о форме
             return HttpResponse(f"Form errors: {form.errors}")
     else:
         return HttpResponseBadRequest('Invalid request method')
@@ -50,9 +56,9 @@ def preview_comment(request):
                 'success': True,
                 'username': form.cleaned_data['username'],
                 'email': form.cleaned_data['email'],
-                'text': form.cleaned_data['text']
+                'text': form.cleaned_data['text'],
             }
-            return JsonResponse(data)
+            return JsonResponse({'preview': data['text']})
         else:
-            return JsonResponse({'success': False, 'error': 'Invalid form data'})
-    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+            return JsonResponse({'error': form.errors}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)

@@ -24,6 +24,7 @@ urlpatterns = [
     path('', include('comments.urls')),
     path('add/', views.add_comment, name='add_comment'),
     path('reply/<int:parent_id>/', views.add_reply, name='add_reply'),
+    path('preview_comment/', views.preview_comment, name='preview_comment'),
 ]
 
 urlpatterns += [
