@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from .models import Comment
 from .forms import CommentForm
-from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
-
 
 def comment_list(request):
+    # Обработка формы комментариев
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
@@ -14,14 +14,21 @@ def comment_list(request):
     else:
         form = CommentForm()
 
-    # Handle sorting
+    # Обработка сортировки
     sort_by = request.GET.get('sort_by', 'created_at')
     order = request.GET.get('order', 'desc')
     if order == 'asc':
         sort_by = f'-{sort_by}'
 
-    # Get all root comments
+    # Получение всех корневых комментариев с учетом сортировки
     comments = Comment.objects.filter(parent__isnull=True).order_by(sort_by)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Отправка данных в формате JSON для AJAX-запроса
+        comments_data = list(comments.values('username', 'email', 'created_at', 'id'))
+        return JsonResponse({'comments': comments_data})
+
+    # Отображение страницы с комментариями
     return render(request, 'comments/comment_list.html', {'form': form, 'comments': comments})
 
 def add_reply(request, parent_id):

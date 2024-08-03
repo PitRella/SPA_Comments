@@ -1,25 +1,23 @@
 <!DOCTYPE html>
-{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Комментарии</title>
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
-        .reply-form {
-            display: none;
+        .sortable {
+            cursor: pointer;
         }
-        .toolbar {
-            margin-bottom: 10px;
+        .sortable::after {
+            content: ' ⇅';
         }
-        .toolbar button {
-            margin-right: 5px;
+        .sortable.asc::after {
+            content: ' ▲';
+        }
+        .sortable.desc::after {
+            content: ' ▼';
         }
     </style>
 </head>
@@ -31,30 +29,20 @@
     <main class="container my-4">
         <form id="comment-form" method="post" action="{% url 'add_comment' %}" class="mb-4">
             {% csrf_token %}
-
-            <!-- Toolbar for HTML tags -->
-            <div class="toolbar">
-                <button type="button" class="btn btn-outline-secondary" onclick="addTag('[i]')">[i]</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="addTag('[strong]')">[strong]</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="addTag('[code]')">[code]</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="addTag('[a href=\'\']')">[a]</button>
-            </div>
-
             {{ form.as_p }}
             <button type="button" class="btn btn-secondary" id="preview-button">Предварительный просмотр</button>
             <button type="submit" class="btn btn-success">Добавить комментарий</button>
         </form>
         <hr>
         <h2>Список комментариев</h2>
-        <div id="preview-section" class="mb-4"></div> <!-- Секция для предварительного просмотра -->
         
         <!-- Comments table -->
-        <table class="table table-striped">
+        <table class="table table-striped" id="comments-table">
             <thead>
                 <tr>
-                    <th class="sortable" onclick="sortTable('username')">User Name</th>
-                    <th class="sortable" onclick="sortTable('email')">E-mail</th>
-                    <th class="sortable" onclick="sortTable('created_at')">Date</th>
+                    <th class="sortable" data-sort="username">User Name</th>
+                    <th class="sortable" data-sort="email">E-mail</th>
+                    <th class="sortable" data-sort="created_at">Date</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -65,44 +53,12 @@
                         <td>{{ comment.email|escape }}</td>
                         <td>{{ comment.created_at }}</td>
                         <td>
-                            <!-- Button to toggle reply form -->
                             <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
-
-        <!-- Рекурсивное отображение комментариев -->
-        <div id="comments">
-            {% for comment in comments %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ comment.username|escape }}</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ comment.email|escape }}</h6>
-                        <p class="card-text">{{ comment.text|safe }}</p>
-                        <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created_at }}</cite></footer>
-
-                        <!-- Кнопка для отображения формы ответа -->
-                        <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
-
-                        <!-- Форма для добавления ответа -->
-                        <div id="reply-form-{{ comment.id }}" class="reply-form mt-3">
-                            <form method="post" action="{% url 'add_reply' comment.id %}">
-                                {% csrf_token %}
-                                {{ form.as_p }}
-                                <button type="submit" class="btn btn-primary">Отправить</button>
-                            </form>
-                        </div>
-
-                        <!-- Рекурсивное отображение ответов -->
-                        <div class="mt-3">
-                            {% include 'comments/replies.html' with replies=comment.replies.all %}
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
 
         <!-- Pagination -->
         <nav aria-label="Page navigation">
@@ -111,9 +67,7 @@
                     <li class="page-item"><a class="page-link" href="?page=1">Первая</a></li>
                     <li class="page-item"><a class="page-link" href="?page={{ comments.previous_page_number }}">Предыдущая</a></li>
                 {% endif %}
-
                 <li class="page-item disabled"><span class="page-link">Страница {{ comments.number }} из {{ comments.paginator.num_pages }}</span></li>
-
                 {% if comments.has_next %}
                     <li class="page-item"><a class="page-link" href="?page={{ comments.next_page_number }}">Следующая</a></li>
                     <li class="page-item"><a class="page-link" href="?page={{ comments.paginator.num_pages }}">Последняя</a></li>
@@ -122,61 +76,68 @@
         </nav>
     </main>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const sortLinks = document.querySelectorAll('.btn-group .btn');
-            const previewButton = document.getElementById('preview-button');
-            const commentForm = document.getElementById('comment-form');
-            const previewSection = document.getElementById('preview-section');
+            const sortables = document.querySelectorAll('.sortable');
+            let currentSort = { field: '', direction: 'asc' };
 
-            sortLinks.forEach(function(link) {
-                link.addEventListener('click', function(event) {
-                    event.preventDefault();
+            sortables.forEach(header => {
+                header.addEventListener('click', function() {
+                    const sortBy = this.getAttribute('data-sort');
+                    const direction = currentSort.field === sortBy && currentSort.direction === 'asc' ? 'desc' : 'asc';
 
-                    const sortBy = this.getAttribute('data-sort-by');
-                    const currentOrder = this.getAttribute('data-current-order');
-                    const newOrder = currentOrder === 'desc' ? 'asc' : 'desc';
-
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('sort_by', sortBy);
-                    url.searchParams.set('order', newOrder);
-
-                    window.location.href = url.href;
+                    currentSort = { field: sortBy, direction: direction };
+                    updateTable(sortBy, direction);
                 });
             });
 
-            previewButton.addEventListener('click', function() {
-                const formData = new FormData(commentForm);
-                fetch('{% url "preview_comment" %}', {
-                    method: 'POST',
-                    body: formData,
+            function updateTable(sortBy, direction) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('sort_by', sortBy);
+                url.searchParams.set('order', direction);
+
+                fetch(url.href, {
                     headers: {
-                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 })
                 .then(response => response.json())
                 .then(data => {
-                    previewSection.innerHTML = data.preview;
+                    const tableBody = document.querySelector('#comments-table tbody');
+                    tableBody.innerHTML = ''; // Clear existing rows
+                    data.comments.forEach(comment => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${comment.username}</td>
+                            <td>${comment.email}</td>
+                            <td>${comment.created_at}</td>
+                            <td>
+                                <button type="button" class="btn btn-primary" onclick="toggleReplyForm('${comment.id}')">Ответить</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+
+                    // Update header sort indicators
+                    sortables.forEach(header => {
+                        header.classList.remove('asc', 'desc');
+                        if (header.getAttribute('data-sort') === sortBy) {
+                            header.classList.add(direction);
+                        }
+                    });
                 });
-            });
-        });
-
-        function toggleReplyForm(commentId) {
-            const form = document.getElementById('reply-form-' + commentId);
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.style.display = 'block';
-            } else {
-                form.style.display = 'none';
             }
-        }
 
-        function addTag(tag) {
-            const commentText = document.getElementById('id_text');
-            commentText.value += tag;
-        }
+            function toggleReplyForm(commentId) {
+                const form = document.getElementById('reply-form-' + commentId);
+                if (form.style.display === 'none' || form.style.display === '') {
+                    form.style.display = 'block';
+                } else {
+                    form.style.display = 'none';
+                }
+            }
+        });
     </script>
 </body>
 </html>
