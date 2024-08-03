@@ -26,8 +26,10 @@ def add_reply(request, parent_id):
             reply.save()
             return redirect('comment_list')
         else:
-            return HttpResponseBadRequest('Invalid form data')
-    return HttpResponseBadRequest('Invalid request method')
+            # Отладочная информация о форме
+            return HttpResponse(f"Form errors: {form.errors}")
+    else:
+        return HttpResponseBadRequest('Invalid request method')
 
 def add_comment(request):
     if request.method == 'POST':
