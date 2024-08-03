@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from .models import Comment
@@ -17,13 +18,25 @@ def comment_list(request):
     # Handle sorting
     sort_by = request.GET.get('sort_by', 'created_at')
     order = request.GET.get('order', 'desc')
-    if order == 'asc':
-        sort_by = f'-{sort_by}'
+
+    # Validate and format sorting parameters
+    if sort_by not in ['username', 'email', 'created_at']:
+        sort_by = 'created_at'
+    if order not in ['asc', 'desc']:
+        order = 'desc'
+
+    # Reverse sorting order if 'desc'
+    sort_by = f'-{sort_by}' if order == 'desc' else sort_by
 
     # Get all root comments
     comments = Comment.objects.filter(parent__isnull=True).order_by(sort_by)
-    return render(request, 'comments/comment_list.html', {'form': form, 'comments': comments})
 
+    # Paginator setup
+    paginator = Paginator(comments, 25  )# Show 10 comments per page.
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'comments/comment_list.html', {'form': form, 'comments': page_obj})
 def add_reply(request, parent_id):
     if request.method == 'POST':
         form = CommentForm(request.POST)
