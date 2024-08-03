@@ -51,10 +51,10 @@
             {% for comment in page_obj %}
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">{{ comment.username|escape }}</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ comment.email|escape }}</h6>
+                        <h5 class="card-title">{{ comment.author.username|escape }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ comment.author.email|escape }}</h6>
                         <p class="card-text">{{ comment.text|safe }}</p>
-                        <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created_at }}</cite></footer>
+                        <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created }}</cite></footer>
 
                         <!-- Кнопка для отображения формы ответа -->
                         <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
@@ -70,13 +70,13 @@
 
                         <!-- Отображение ответов -->
                         <div class="mt-3">
-                            {% for reply in comment.replies.all %}
+                            {% for reply in comment.comment_set.all %}
                                 <div class="card ms-3 mb-3">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ reply.username|escape }}</h6>
-                                        <h6 class="card-subtitle mb-2 text-muted">{{ reply.email|escape }}</h6>
+                                        <h6 class="card-title">{{ reply.author.username|escape }}</h6>
+                                        <h6 class="card-subtitle mb-2 text-muted">{{ reply.author.email|escape }}</h6>
                                         <p class="card-text">{{ reply.text|safe }}</p>
-                                        <footer class="blockquote-footer"><cite title="Source Title">{{ reply.created_at }}</cite></footer>
+                                        <footer class="blockquote-footer"><cite title="Source Title">{{ reply.created }}</cite></footer>
                                     </div>
                                 </div>
                             {% empty %}
@@ -128,20 +128,17 @@
                     url.searchParams.set('sort_by', sortBy);
                     url.searchParams.set('order', newOrder);
 
-                    window.location.href = url.toString();
+                    window.location.href = url.href;
                 });
             });
 
-            previewButton.addEventListener('click', function(event) {
-                event.preventDefault();
-
+            previewButton.addEventListener('click', function() {
                 const formData = new FormData(commentForm);
-
                 fetch('{% url "preview_comment" %}', {
                     method: 'POST',
                     body: formData,
                     headers: {
-                        'X-CSRFToken': commentForm.querySelector('[name=csrfmiddlewaretoken]').value
+                        'X-CSRFToken': '{{ csrf_token }}'
                     }
                 })
                 .then(response => response.json())
@@ -157,53 +154,26 @@
                             </div>
                         `;
                     } else {
-                        previewSection.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                        previewSection.innerHTML = `<p>${data.error}</p>`;
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
                 });
             });
         });
 
         function toggleReplyForm(commentId) {
-            var form = document.getElementById('reply-form-' + commentId);
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.style.display = 'block';
-            } else {
-                form.style.display = 'none';
-            }
+            const replyForm = document.getElementById('reply-form-' + commentId);
+            replyForm.style.display = replyForm.style.display === 'none' || replyForm.style.display === '' ? 'block' : 'none';
         }
 
         function addTag(tag) {
-            const textarea = document.querySelector('#id_text'); // Adjust based on your form field name
-            const selectionStart = textarea.selectionStart;
-            const selectionEnd = textarea.selectionEnd;
-            const selectedText = textarea.value.substring(selectionStart, selectionEnd);
+            const textarea = document.querySelector('#id_text');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
 
-            let openTag = tag;
-            let closeTag = '';
-            if (tag === '[i]') {
-                closeTag = '</i>';
-                openTag = '<i>';
-            } else if (tag === '[strong]') {
-                closeTag = '</strong>';
-                openTag = '<strong>';
-            } else if (tag === '[code]') {
-                closeTag = '</code>';
-                openTag = '<code>';
-            } else if (tag === '[a href=""]') {
-                const url = prompt("Enter URL:", "http://");
-                closeTag = '</a>';
-                openTag = `<a href="${url}">`;
-            }
-
-            const beforeText = textarea.value.substring(0, selectionStart);
-            const afterText = textarea.value.substring(selectionEnd);
-            textarea.value = `${beforeText}${openTag}${selectedText}${closeTag}${afterText}`;
+            textarea.value = text.substring(0, start) + tag + text.substring(start, end) + tag.replace('[', '[/') + text.substring(end);
             textarea.focus();
-            textarea.selectionStart = selectionStart + openTag.length;
-            textarea.selectionEnd = selectionStart + openTag.length + selectedText.length;
+            textarea.setSelectionRange(end + tag.length, end + tag.length);
         }
     </script>
 </body>
