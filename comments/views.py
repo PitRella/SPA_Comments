@@ -15,13 +15,13 @@ def comment_list(request):
     else:
         form = CommentForm()
 
-    comments_list = Comment.objects.all().order_by('-created_at')  # Используйте правильное поле для сортировки
-    paginator = Paginator(comments_list, 10)  # Показывать по 10 комментариев на странице
+    # Получите только корневые комментарии (без родителей)
+    comments = Comment.objects.filter(parent__isnull=True).order_by('-created_at')
 
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    return render(request, 'comments/comment_list.html', {'form': form, 'comments': comments})
 
-    return render(request, 'comments/comment_list.html', {'form': form, 'page_obj': page_obj})
+
+
 
 
 def add_comment(request):

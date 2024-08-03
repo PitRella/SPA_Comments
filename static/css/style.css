@@ -18,7 +18,9 @@ form {
     padding: 20px;
     margin-bottom: 20px;
 }
-
+.reply-form {
+    display: none; /* Скрыто по умолчанию, отображается при клике */
+}
 /* Стили для кнопки */
 button {
     background-color: #007bff;

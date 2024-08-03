@@ -48,45 +48,47 @@
         <h2>Список комментариев</h2>
         <div id="preview-section" class="mb-4"></div> <!-- Секция для предварительного просмотра -->
         <div id="comments">
-            {% for comment in page_obj %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ comment.author.username|escape }}</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ comment.author.email|escape }}</h6>
-                        <p class="card-text">{{ comment.text|safe }}</p>
-                        <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created }}</cite></footer>
+    {% for comment in comments %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ comment.username|escape }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{ comment.email|escape }}</h6>
+                <p class="card-text">{{ comment.text|safe }}</p>
+                <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created_at }}</cite></footer>
 
-                        <!-- Кнопка для отображения формы ответа -->
-                        <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
+                <!-- Кнопка для отображения формы ответа -->
+                <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
 
-                        <!-- Форма для добавления ответа -->
-                        <div id="reply-form-{{ comment.id }}" class="reply-form mt-3">
-                            <form method="post" action="{% url 'add_reply' comment.id %}">
-                                {% csrf_token %}
-                                {{ reply_form.as_p }}
-                                <button type="submit" class="btn btn-primary">Отправить</button>
-                            </form>
-                        </div>
-
-                        <!-- Отображение ответов -->
-                        <div class="mt-3">
-                            {% for reply in comment.comment_set.all %}
-                                <div class="card ms-3 mb-3">
-                                    <div class="card-body">
-                                        <h6 class="card-title">{{ reply.author.username|escape }}</h6>
-                                        <h6 class="card-subtitle mb-2 text-muted">{{ reply.author.email|escape }}</h6>
-                                        <p class="card-text">{{ reply.text|safe }}</p>
-                                        <footer class="blockquote-footer"><cite title="Source Title">{{ reply.created }}</cite></footer>
-                                    </div>
-                                </div>
-                            {% empty %}
-                                <p>Нет ответов</p>
-                            {% endfor %}
-                        </div>
-                    </div>
+                <!-- Форма для добавления ответа -->
+                <div id="reply-form-{{ comment.id }}" class="reply-form mt-3">
+                    <form method="post" action="{% url 'add_reply' comment.id %}">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">Отправить</button>
+                    </form>
                 </div>
-            {% endfor %}
+
+                <!-- Отображение ответов -->
+                <div class="mt-3">
+                    {% for reply in comment.replies.all %}
+                        <div class="card ms-3 mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ reply.username|escape }}</h6>
+                                <h6 class="card-subtitle mb-2 text-muted">{{ reply.email|escape }}</h6>
+                                <p class="card-text">{{ reply.text|safe }}</p>
+                                <footer class="blockquote-footer"><cite title="Source Title">{{ reply.created_at }}</cite></footer>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p>Нет ответов</p>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
+    {% endfor %}
+</div>
+
+
 
         <!-- Pagination -->
         <nav aria-label="Page navigation">
@@ -161,9 +163,11 @@
         });
 
         function toggleReplyForm(commentId) {
-            const replyForm = document.getElementById('reply-form-' + commentId);
-            replyForm.style.display = replyForm.style.display === 'none' || replyForm.style.display === '' ? 'block' : 'none';
-        }
+    const replyForm = document.getElementById('reply-form-' + commentId);
+    if (replyForm) {
+        replyForm.style.display = replyForm.style.display === 'none' || replyForm.style.display === '' ? 'block' : 'none';
+    }
+}
 
         function addTag(tag) {
             const textarea = document.querySelector('#id_text');
