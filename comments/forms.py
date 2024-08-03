@@ -11,8 +11,8 @@ class CaptchaCommentForm(forms.ModelForm):
         model = Comment
         fields = ['username', 'email', 'homepage', 'text', 'captcha']
 
-    def clean_text(self):
-        value = self.cleaned_data.get('text')
+    def clean(self):
+        cleaned_data = super().clean()
         ALLOWED_TAGS = ['a', 'code', 'i', 'strong']
         ALLOWED_ATTRIBUTES = {
             'a': ['href', 'title'],
@@ -21,10 +21,15 @@ class CaptchaCommentForm(forms.ModelForm):
             'strong': [],
         }
 
-        cleaned_value = bleach.clean(value, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
-        if cleaned_value != value:
-            raise ValidationError("Message contains disallowed HTML tags or attributes.")
-        return cleaned_value
+        for field in ['username', 'email', 'homepage', 'text']:
+            value = cleaned_data.get(field)
+            if value:
+                cleaned_value = bleach.clean(value, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+                if cleaned_value != value:
+                    self.add_error(field, "Message contains disallowed HTML tags or attributes.")
+                cleaned_data[field] = cleaned_value
+
+        return cleaned_data
 
 class ReplyForm(forms.ModelForm):
     class Meta:
