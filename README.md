@@ -1,6 +1,7 @@
 # Django Project
 
 Welcome to the Django Project! This document will guide you through the steps required to set up and run the project locally on your machine.
+![image](https://github.com/user-attachments/assets/e79a3634-ebad-4453-8148-67ce034a55d0)
 
 ## Prerequisites
 
