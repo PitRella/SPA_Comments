@@ -4,6 +4,9 @@
             <h5 class="card-title">{{ reply.username|escape }}</h5>
             <h6 class="card-subtitle mb-2 text-muted">{{ reply.email|escape }}</h6>
             <p class="card-text">{{ reply.text|safe }}</p>
+            {% if reply.image %}
+                <img src="{{ reply.image.url }}" alt="Reply image" class="img-fluid mb-3" style="max-width: 100%; max-height: 240px;" />
+            {% endif %}
             <footer class="blockquote-footer"><cite title="Source Title">{{ reply.created_at }}</cite></footer>
             
             <!-- Кнопка для отображения формы ответа -->
@@ -11,7 +14,7 @@
 
             <!-- Форма для добавления ответа -->
             <div id="reply-form-{{ reply.id }}" class="reply-form mt-3">
-                <form method="post" action="{% url 'add_reply' reply.id %}">
+                <form method="post" enctype="multipart/form-data" action="{% url 'add_reply' reply.id %}">
                     {% csrf_token %}
                     {{ form.as_p }}
                     <button type="submit" class="btn btn-primary">Отправить</button>

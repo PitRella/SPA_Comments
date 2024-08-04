@@ -44,7 +44,7 @@
                     <td>{{ comment.created_at }}</td>
                     <td>
                         <!-- Button to toggle reply form -->
-                        <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
+                        <button type="button" enctype="multipart/form-data" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
                     </td>
                 </tr>
             {% endfor %}
@@ -71,11 +71,11 @@
 
                     <!-- Reply form -->
                     <div id="reply-form-{{ comment.id }}" class="reply-form mt-3">
-                        <form method="post" action="{% url 'add_reply' comment.id %}">
-                            {% csrf_token %}
-                            {{ form.as_p }}
-                            <button type="submit" class="btn btn-primary">Отправить</button>
-                        </form>
+                        <form method="post" enctype="multipart/form-data" action="{% url 'add_reply' comment.id %}">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">Отправить</button>
+                    </form>
                     </div>
 
                     <!-- Recursive display of replies -->

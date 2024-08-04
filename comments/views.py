@@ -50,7 +50,7 @@ def comment_list(request):
 
 def add_reply(request, parent_id):
     if request.method == 'POST':
-        form = CommentForm(request.POST)
+        form = CommentForm(request.POST, request.FILES)
         if form.is_valid():
             reply = form.save(commit=False)
             reply.text = sanitize_html(reply.text)
