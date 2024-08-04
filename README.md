@@ -14,36 +14,51 @@ Ensure you have the following installed:
 
 Follow these steps to set up and run the project:
 
-### 1. Clone the Repository
+1. **Clone the Repository**
 
-```bash
-git clone https://github.com/yourusername/yourproject.git
-cd yourproject
+    ```bash
+    git clone https://github.com/yourusername/yourproject.git
+    cd yourproject
+    ```
 
+2. **Set Up a Virtual Environment**
 
-2. Set Up a Virtual Environment
+    Create and activate a virtual environment:
 
-Create and activate a virtual environment
-# Create virtual environment
-python -m venv venv
+    ```bash
+    # Create virtual environment
+    python -m venv venv
 
-# Activate virtual environment
-# On Windows
-venv\Scripts\activate
-# On macOS/Linux
-source venv/bin/activate
-3. Install Dependencies
-pip install -r requirements.txt
-4. Configure the Database
-In my project i used mysql
+    # Activate virtual environment
+    # On Windows
+    venv\Scripts\activate
+    # On macOS/Linux
+    source venv/bin/activate
+    ```
 
-5. Apply Migrations
+3. **Install Dependencies**
 
-Create and apply database migrations:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-bash
+4. **Configure the Database**
 
-python manage.py makemigrations
-python manage.py migrate
+    This project uses MySQL. Ensure you have MySQL installed and configured. Update your `settings.py` file with your database credentials.
 
-python manage.py runserver
+5. **Apply Migrations**
+
+    Create and apply database migrations:
+
+    ```bash
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
+
+6. **Run the Server**
+
+    ```bash
+    python manage.py runserver
+    ```
+
+Your Django project should now be up and running at `http://127.0.0.1:8000/`.
