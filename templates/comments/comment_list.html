@@ -24,7 +24,7 @@
     </form>
     <hr>
     <h2>Список комментариев</h2>
-    <div id="preview-section" class="mb-4"></div> <!-- Секция для предварительного просмотра -->
+    <div id="preview-section" class="mb-4"></div> <!-- Section for preview -->
 
     <!-- Comments table -->
     <table class="table table-striped">
@@ -51,7 +51,7 @@
         </tbody>
     </table>
 
-    <!-- Рекурсивное отображение комментариев -->
+    <!-- Recursive display of comments -->
     <div id="comments">
         {% for comment in comments %}
             <div class="card mb-3">
@@ -59,12 +59,17 @@
                     <h5 class="card-title">{{ comment.username|escape }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ comment.email|escape }}</h6>
                     <p class="card-text">{{ comment.text|safe }}</p>
+
+                    {% if comment.image %}
+                        <img src="{{ comment.image.url }}" alt="Comment image" class="img-fluid mb-3" style="max-width: 100%; max-height: 240px;"/>
+                    {% endif %}
+
                     <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created_at }}</cite></footer>
 
-                    <!-- Кнопка для отображения формы ответа -->
+                    <!-- Button to show reply form -->
                     <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
 
-                    <!-- Форма для добавления ответа -->
+                    <!-- Reply form -->
                     <div id="reply-form-{{ comment.id }}" class="reply-form mt-3">
                         <form method="post" action="{% url 'add_reply' comment.id %}">
                             {% csrf_token %}
@@ -73,7 +78,7 @@
                         </form>
                     </div>
 
-                    <!-- Рекурсивное отображение ответов -->
+                    <!-- Recursive display of replies -->
                     <div class="mt-3">
                         {% include 'comments/replies.html' with replies=comment.replies.all %}
                     </div>

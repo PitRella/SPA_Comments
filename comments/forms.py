@@ -3,6 +3,8 @@ import html5lib
 from captcha.fields import CaptchaField
 from django import forms
 from .models import Comment
+from PIL import Image  # Импорт класса Image
+from io import BytesIO
 
 class CommentForm(forms.ModelForm):
     captcha = CaptchaField(required=False)
@@ -43,12 +45,9 @@ class CommentForm(forms.ModelForm):
         # Validate image size
         image = cleaned_data.get('image')
         if image:
-            from PIL import Image
-            from io import BytesIO
-
             img = Image.open(image)
             if img.size[0] > 320 or img.size[1] > 240:
-                img.thumbnail((320, 240), Image.ANTIALIAS)
+                img.thumbnail((320, 240), Image.Resampling.LANCZOS)  # Используем Image.Resampling.LANCZOS
                 temp_io = BytesIO()
                 img.save(temp_io, format=img.format)
                 temp_io.seek(0)

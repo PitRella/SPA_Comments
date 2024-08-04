@@ -64,7 +64,7 @@ def add_reply(request, parent_id):
 
 def add_comment(request):
     if request.method == 'POST':
-        form = CommentForm(request.POST)
+        form = CommentForm(request.POST, request.FILES)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.text = sanitize_html(comment.text)
