@@ -18,8 +18,8 @@ Follow these steps to set up and run the project:
 1. **Clone the Repository**
 
     ```bash
-    git clone https://github.com/yourusername/yourproject.git
-    cd yourproject
+    git clone [[https://github.com/yourusername/yourproject.git]()](https://github.com/PitRella/SPA_Comments.git)
+    cd SPA_Comments
     ```
 
 2. **Set Up a Virtual Environment**
@@ -53,6 +53,7 @@ Follow these steps to set up and run the project:
 
     ```bash
     python manage.py makemigrations
+    python manage.py makemigrations comments
     python manage.py migrate
     ```
 
