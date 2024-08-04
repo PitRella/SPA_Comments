@@ -2,6 +2,8 @@ import bleach
 import html5lib
 from captcha.fields import CaptchaField
 from django import forms
+from django.core.files.base import ContentFile
+
 from .models import Comment
 from PIL import Image  # Импорт класса Image
 from io import BytesIO
@@ -26,6 +28,7 @@ class CommentForm(forms.ModelForm):
             'strong': [],
         }
 
+        # Clean text fields
         for field in ['username', 'email', 'homepage', 'text']:
             value = cleaned_data.get(field)
             if value:
@@ -42,24 +45,32 @@ class CommentForm(forms.ModelForm):
 
                 cleaned_data[field] = cleaned_value
 
-        # Validate image size
+        # Validate and resize image
         image = cleaned_data.get('image')
         if image:
-            img = Image.open(image)
-            if img.size[0] > 320 or img.size[1] > 240:
-                img.thumbnail((320, 240), Image.Resampling.LANCZOS)  # Используем Image.Resampling.LANCZOS
-                temp_io = BytesIO()
-                img.save(temp_io, format=img.format)
-                temp_io.seek(0)
-                image.file = temp_io
-
-            if image.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
-                self.add_error('image', 'Unsupported file format. Only JPG, PNG, and GIF are allowed.')
+            try:
+                img = Image.open(image)
+                if img.size[0] > 320 or img.size[1] > 240:
+                    img.thumbnail((320, 240), Image.Resampling.LANCZOS)
+                    temp_io = BytesIO()
+                    img.save(temp_io, format=img.format)
+                    temp_io.seek(0)
+                    image_name = f"resized_{image.name}"
+                    cleaned_data['image'] = ContentFile(temp_io.read(), name=image_name)
+            except IOError:
+                self.add_error('image', 'Invalid image file.')
 
         # Validate file size and format
         file = cleaned_data.get('file')
         if file:
             if file.size > 5 * 1024 * 1024:  # Limit file size to 5MB
                 self.add_error('file', 'File size exceeds the 5MB limit.')
+            if not file.name.endswith('.txt'):
+                self.add_error('file', 'Only TXT files are allowed.')
+            # Check if file content size exceeds 100 KB
+            file_content = file.read()
+            if len(file_content) > 100 * 1024:
+                self.add_error('file', 'File size exceeds the 100KB limit.')
+            file.seek(0)  # Reset file pointer after reading
 
         return cleaned_data
