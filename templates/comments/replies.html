@@ -5,7 +5,10 @@
             <h6 class="card-subtitle mb-2 text-muted">{{ reply.email|escape }}</h6>
             <p class="card-text">{{ reply.text|safe }}</p>
             {% if reply.image %}
-                <img src="{{ reply.image.url }}" alt="Reply image" class="img-fluid mb-3" style="max-width: 100%; max-height: 240px;" />
+                <!-- Используйте ссылку с атрибутом data-lightbox для активации Lightbox2 -->
+                <a href="{{ reply.image.url }}" data-lightbox="reply-images" data-title="Reply from {{ reply.username }}">
+                    <img src="{{ reply.image.url }}" alt="Reply image" class="img-fluid mb-3" style="max-width: 100%; max-height: 240px;" />
+                </a>
             {% endif %}
             <footer class="blockquote-footer"><cite title="Source Title">{{ reply.created_at }}</cite></footer>
             
