@@ -5,12 +5,13 @@ body {
 
 /* Styles for the header */
 header {
-    background-color: #007bff;
-    color: white;
     text-align: center;
     padding: 1rem;
+    font-weight: bold;
 }
-
+header h1 {
+    font-weight: bold;
+}
 /* Styles for the main section */
 main {
     padding: 1rem;
@@ -34,7 +35,9 @@ form {
 .reply-form {
     display: none;
 }
-
+div.card.mt-3 {
+    margin-left: 4%;
+}
 /* Styles for the table */
 .table {
     margin-bottom: 1rem;

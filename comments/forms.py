@@ -17,7 +17,13 @@ class CommentForm(forms.ModelForm):
         fields = ['username', 'email', 'homepage', 'text', 'captcha', 'parent', 'image', 'file']
         # Define widgets for the form fields
         widgets = {
-            'parent': forms.HiddenInput()  # Hide the parent field as it is not editable
+            'parent': forms.HiddenInput(),  # Hide the parent field as it is not editable
+            'username': forms.TextInput(attrs={'placeholder': 'Введите ваше имя', 'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Введите ваш email', 'class': 'form-control'}),
+            'homepage': forms.URLInput(
+                attrs={'placeholder': 'Введите URL вашего сайта (не обязательно)', 'class': 'form-control'}),
+            'text': forms.Textarea(
+                attrs={'placeholder': 'Введите текст комментария', 'rows': 4, 'class': 'form-control'})
         }
 
     def clean(self):
