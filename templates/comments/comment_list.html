@@ -61,7 +61,10 @@
                     <p class="card-text">{{ comment.text|safe }}</p>
 
                     {% if comment.image %}
-                        <img src="{{ comment.image.url }}" alt="Comment image" class="img-fluid mb-3" style="max-width: 100%; max-height: 240px;"/>
+                        <!-- Lightbox link for the image -->
+                        <a href="{{ comment.image.url }}" data-lightbox="comment-images" data-title="{{ comment.username }}">
+                            <img src="{{ comment.image.url }}" alt="Comment image" class="img-fluid mb-3" style="max-width: 100%; max-height: 240px;"/>
+                        </a>
                     {% endif %}
 
                     <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created_at }}</cite></footer>
