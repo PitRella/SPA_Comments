@@ -1,17 +1,15 @@
 {% extends "comments/_base.html" %}
 
-{% block title %}Комментарии{% endblock %} <!-- Page title -->
+{% block title %}Комментарии{% endblock %}
 
 {% block header %}
-    Комментарии <!-- Header section for the page -->
+    Комментарии
 {% endblock %}
 
 {% block content %}
-    <!-- Form for adding a comment -->
     <form id="comment-form" method="post" enctype="multipart/form-data" action="{% url 'add_comment' %}" class="mb-4">
-        {% csrf_token %} <!-- CSRF token for form protection -->
+        {% csrf_token %}
 
-        <!-- Toolbar for inserting HTML tags into the comment -->
         <div class="toolbar">
             <button type="button" class="btn btn-outline-secondary" data-tag="<i></i>" onclick="addTag(this.getAttribute('data-tag'))">[i]</button>
             <button type="button" class="btn btn-outline-secondary" data-tag="<strong></strong>" onclick="addTag(this.getAttribute('data-tag'))">[strong]</button>
@@ -19,70 +17,68 @@
             <button type="button" class="btn btn-outline-secondary" data-tag="<a href=''></a>" onclick="addTag(this.getAttribute('data-tag'))">[a]</button>
         </div>
 
-        {{ form.as_p }} <!-- Render the form fields -->
-        <button type="button" class="btn btn-secondary" id="preview-button">Предварительный просмотр</button> <!-- Button to preview the comment -->
-        <button type="submit" class="btn btn-success">Добавить комментарий</button> <!-- Button to submit the comment -->
+        {{ form.as_p }}
+        <button type="button" class="btn btn-secondary" id="preview-button">Предварительный просмотр</button>
+        <button type="submit" class="btn btn-success">Добавить комментарий</button>
     </form>
     <hr>
     <h2>Список комментариев</h2>
-    <div id="preview-section" class="mb-4"></div> <!-- Section to display preview of the comment -->
+    <div id="preview-section" class="mb-4"></div>
 
-    <!-- Table for displaying comments -->
     <table class="table table-striped">
         <thead>
             <tr>
                 <th class="sortable" data-sort-by="username" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">User Name</th>
                 <th class="sortable" data-sort-by="email" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">E-mail</th>
                 <th class="sortable" data-sort-by="created_at" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">Date</th>
-                <th>Actions</th> <!-- Column for action buttons -->
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for comment in comments %}
                 <tr>
-                    <td>{{ comment.username|escape }}</td> <!-- Display username -->
-                    <td>{{ comment.email|escape }}</td> <!-- Display email -->
-                    <td>{{ comment.created_at }}</td> <!-- Display creation date -->
+                    <td>{{ comment.username|escape }}</td>
+                    <td>{{ comment.email|escape }}</td>
+                    <td>{{ comment.created_at }}</td>
                     <td>
-                        <!-- Button to toggle the reply form -->
-                        <button type="button" enctype="multipart/form-data" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
+                        <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
                     </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <!-- Recursive display of comments with replies -->
     <div id="comments">
         {% for comment in comments %}
             <div class="card mb-3">
                 <div class="card-body">
-                    <h5 class="card-title">{{ comment.username|escape }}</h5> <!-- Display username -->
-                    <h6 class="card-subtitle mb-2 text-muted">{{ comment.email|escape }}</h6> <!-- Display email -->
-                    <p class="card-text">{{ comment.text|safe }}</p> <!-- Display comment text -->
-
-                    {% if comment.image %}
-                        <!-- Lightbox link for images attached to the comment -->
-                        <a href="{{ comment.image.url }}" data-lightbox="comment-images" data-title="{{ comment.username }}">
-                            <img src="{{ comment.image.url }}" alt="Comment image" class="img-fluid mb-3" style="max-width: 100%; max-height: 240px;"/>
-                        </a>
+                    <h5 class="card-title">{{ comment.username|escape }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ comment.email|escape }}</h6>
+                    <p class="card-text">{{ comment.text|safe }}</p>
+                    {% if comment.file %}
+                        <div>
+                            <p>Прикрепленный файл:</p>
+                            {% if comment.file.url %}
+                                <a href="{{ comment.file.url }}" target="_blank">Скачать файл</a>
+                                
+                            {% else %}
+                                <p>Файл не доступен</p>
+                            {% endif %}
+                        </div>
                     {% endif %}
 
-                    <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created_at }}</cite></footer> <!-- Display creation date -->
+                    <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created_at }}</cite></footer>
 
-                    <!-- Button to show the reply form -->
                     <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
 
-                    <!-- Reply form for the specific comment -->
                     <div id="reply-form-{{ comment.id }}" class="reply-form mt-3">
                         <form method="post" enctype="multipart/form-data" action="{% url 'add_reply' comment.id %}">
                         {% csrf_token %}
-                        {{ form.as_p }} <!-- Render reply form fields -->
-                        <button type="submit" class="btn btn-primary">Отправить</button> <!-- Button to submit the reply -->
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">Отправить</button>
                     </form>
                     </div>
 
-                    <!-- Recursive inclusion of replies to the comment -->
                     <div class="mt-3">
                         {% include 'comments/replies.html' with replies=comment.replies.all %}
                     </div>
@@ -91,7 +87,6 @@
         {% endfor %}
     </div>
 
-    <!-- Pagination controls for navigating through comments -->
     <nav aria-label="Page navigation">
         <ul class="pagination">
             {% if comments.has_previous %}

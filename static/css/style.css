@@ -84,3 +84,25 @@ img:hover {
     border: 5px solid #007bff; /* Border width and color */
     box-shadow: 0 0 15px rgba(0, 123, 255, 0.5); /* Shadow to enhance the effect */
 }
+
+
+.card-body .card-text {
+    margin-bottom: 10px;
+}
+
+.card-body footer {
+    margin-top: auto;
+}
+
+.card-body a {
+    display: inline-block;
+    margin-top: 5px;
+}
+
+.reply-form {
+    margin-top: 20px;
+}
+
+.mt-3 {
+    margin-top: 1rem;
+}
