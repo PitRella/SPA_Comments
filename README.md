@@ -53,6 +53,7 @@ Follow these steps to set up and run the project:
 
     ```bash
     python manage.py makemigrations
+    python manage.py makemigrations comments
     python manage.py migrate
     ```
 
