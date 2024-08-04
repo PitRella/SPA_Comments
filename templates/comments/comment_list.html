@@ -34,10 +34,10 @@
 
             <!-- Toolbar for HTML tags -->
             <div class="toolbar">
-                <button type="button" class="btn btn-outline-secondary" onclick="addTag('[i]')">[i]</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="addTag('[strong]')">[strong]</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="addTag('[code]')">[code]</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="addTag('[a href=\'\']')">[a]</button>
+                <button type="button" class="btn btn-outline-secondary" data-tag="<i></i>" onclick="addTag(this.getAttribute('data-tag'))">[i]</button>
+                <button type="button" class="btn btn-outline-secondary" data-tag="<strong></strong>" onclick="addTag(this.getAttribute('data-tag'))">[strong]</button>
+                <button type="button" class="btn btn-outline-secondary" data-tag="<code></code>" onclick="addTag(this.getAttribute('data-tag'))">[code]</button>
+                <button type="button" class="btn btn-outline-secondary" data-tag="<a href=''></a>" onclick="addTag(this.getAttribute('data-tag'))">[a]</button>
             </div>
 
             {{ form.as_p }}
@@ -47,31 +47,31 @@
         <hr>
         <h2>Список комментариев</h2>
         <div id="preview-section" class="mb-4"></div> <!-- Секция для предварительного просмотра -->
-        
-<!-- Comments table -->
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th class="sortable" data-sort-by="username" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">User Name</th>
-            <th class="sortable" data-sort-by="email" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">E-mail</th>
-            <th class="sortable" data-sort-by="created_at" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">Date</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for comment in comments %}
-            <tr>
-                <td>{{ comment.username|escape }}</td>
-                <td>{{ comment.email|escape }}</td>
-                <td>{{ comment.created_at }}</td>
-                <td>
-                    <!-- Button to toggle reply form -->
-                    <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
+        <!-- Comments table -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="sortable" data-sort-by="username" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">User Name</th>
+                    <th class="sortable" data-sort-by="email" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">E-mail</th>
+                    <th class="sortable" data-sort-by="created_at" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for comment in comments %}
+                    <tr>
+                        <td>{{ comment.username|escape }}</td>
+                        <td>{{ comment.email|escape }}</td>
+                        <td>{{ comment.created_at }}</td>
+                        <td>
+                            <!-- Button to toggle reply form -->
+                            <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
         <!-- Рекурсивное отображение комментариев -->
         <div id="comments">
@@ -104,93 +104,76 @@
             {% endfor %}
         </div>
 
-<!-- Pagination -->
-<nav aria-label="Page navigation">
-    <ul class="pagination">
-        {% if comments.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page=1&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Первая</a></li>
-            <li class="page-item"><a class="page-link" href="?page={{ comments.previous_page_number }}&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Предыдущая</a></li>
-        {% endif %}
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if comments.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Первая</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ comments.previous_page_number }}&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Предыдущая</a></li>
+                {% endif %}
 
-        <li class="page-item disabled"><span class="page-link">Страница {{ comments.number }} из {{ comments.paginator.num_pages }}</span></li>
+                <li class="page-item disabled"><span class="page-link">Страница {{ comments.number }} из {{ comments.paginator.num_pages }}</span></li>
 
-        {% if comments.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ comments.next_page_number }}&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Следующая</a></li>
-            <li class="page-item"><a class="page-link" href="?page={{ comments.paginator.num_pages }}&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Последняя</a></li>
-        {% endif %}
-    </ul>
-</nav>
+                {% if comments.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ comments.next_page_number }}&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Следующая</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ comments.paginator.num_pages }}&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Последняя</a></li>
+                {% endif %}
+            </ul>
+        </nav>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sortLinks = document.querySelectorAll('.btn-group .btn');
-            const previewButton = document.getElementById('preview-button');
-            const commentForm = document.getElementById('comment-form');
-            const previewSection = document.getElementById('preview-section');
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const previewButton = document.getElementById('preview-button');
+                const commentForm = document.getElementById('comment-form');
+                const previewSection = document.getElementById('preview-section');
 
-            sortLinks.forEach(function(link) {
-                link.addEventListener('click', function(event) {
-                    event.preventDefault();
-
-                    const sortBy = this.getAttribute('data-sort-by');
-                    const currentOrder = this.getAttribute('data-current-order');
-                    const newOrder = currentOrder === 'desc' ? 'asc' : 'desc';
-
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('sort_by', sortBy);
-                    url.searchParams.set('order', newOrder);
-
-                    window.location.href = url.href;
+                previewButton.addEventListener('click', function() {
+                    const formData = new FormData(commentForm);
+                    fetch('{% url "preview_comment" %}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        previewSection.innerHTML = data.preview;
+                    })
+                    .catch(error => console.error('Error:', error));
                 });
             });
 
-            previewButton.addEventListener('click', function() {
-                const formData = new FormData(commentForm);
-                fetch('{% url "preview_comment" %}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    previewSection.innerHTML = data.preview;
-                });
-            });
-        });
-
-        function toggleReplyForm(commentId) {
-            const form = document.getElementById('reply-form-' + commentId);
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.style.display = 'block';
-            } else {
-                form.style.display = 'none';
+            function toggleReplyForm(commentId) {
+                const form = document.getElementById(`reply-form-${commentId}`);
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
             }
-        }
-        function sortTable(header) {
-    const sortBy = header.getAttribute('data-sort-by');
-    const currentOrder = header.getAttribute('data-current-order');
-    const newOrder = currentOrder === 'desc' ? 'asc' : 'desc';
-    
-    // Update current order attribute for the header
-    header.setAttribute('data-current-order', newOrder);
 
-    // Update URL parameters
-    const url = new URL(window.location.href);
-    url.searchParams.set('sort_by', sortBy);
-    url.searchParams.set('order', newOrder);
+            function sortTable(th) {
+                const sortBy = th.getAttribute('data-sort-by');
+                let currentOrder = th.getAttribute('data-current-order');
+                currentOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+                const url = new URL(window.location.href);
+                url.searchParams.set('sort_by', sortBy);
+                url.searchParams.set('order', currentOrder);
+                window.location.href = url.toString();
+            }
 
-    window.location.href = url.href;
-}
-    
-        function addTag(tag) {
-            const commentText = document.getElementById('id_text');
-            commentText.value += tag;
-        }
-    </script>
+            function addTag(tag) {
+                const textarea = document.getElementById('id_text');
+                const startPos = textarea.selectionStart;
+                const endPos = textarea.selectionEnd;
+                const text = textarea.value;
+                const before = text.substring(0, startPos);
+                const after = text.substring(endPos, text.length);
+                textarea.value = `${before}${tag}${after}`;
+                textarea.setSelectionRange(startPos + tag.length / 2, startPos + tag.length / 2);
+                textarea.focus();
+            }
+        </script>
+    </main>
 </body>
 </html>

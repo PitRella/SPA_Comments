@@ -4,13 +4,23 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Comment
 from .forms import CommentForm
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
+import bleach
 
+def sanitize_html(html):
+    allowed_tags = ['b', 'i', 'u', 'a', 'p', 'br', 'ul', 'ol', 'li', 'blockquote', 'code']
+    allowed_attributes = {
+        'a': ['href', 'title'],
+    }
+    cleaned_html = bleach.clean(html, tags=allowed_tags, attributes=allowed_attributes, strip=True)
+    return cleaned_html
 
 def comment_list(request):
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
-            form.save()
+            comment = form.save(commit=False)
+            comment.text = sanitize_html(comment.text)
+            comment.save()
             return redirect('comment_list')
     else:
         form = CommentForm()
@@ -37,11 +47,13 @@ def comment_list(request):
     page_obj = paginator.get_page(page_number)
 
     return render(request, 'comments/comment_list.html', {'form': form, 'comments': page_obj})
+
 def add_reply(request, parent_id):
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
             reply = form.save(commit=False)
+            reply.text = sanitize_html(reply.text)
             reply.parent = get_object_or_404(Comment, id=parent_id)
             reply.save()
             return redirect('comment_list')
@@ -54,7 +66,9 @@ def add_comment(request):
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
-            form.save()
+            comment = form.save(commit=False)
+            comment.text = sanitize_html(comment.text)
+            comment.save()
             return redirect('comment_list')
         else:
             return HttpResponse(f"Form errors: {form.errors}")
@@ -65,11 +79,12 @@ def preview_comment(request):
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
+            text = sanitize_html(form.cleaned_data['text'])
             data = {
                 'success': True,
                 'username': form.cleaned_data['username'],
                 'email': form.cleaned_data['email'],
-                'text': form.cleaned_data['text'],
+                'text': text,
             }
             return JsonResponse({'preview': data['text']})
         else:
