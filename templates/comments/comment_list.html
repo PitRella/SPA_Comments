@@ -1,179 +1,101 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Комментарии</title>
+{% extends "comments/_base.html" %}
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        .reply-form {
-            display: none;
-        }
-        .toolbar {
-            margin-bottom: 10px;
-        }
-        .toolbar button {
-            margin-right: 5px;
-        }
-    </style>
-</head>
-<body>
-    <header class="bg-primary text-white text-center py-3">
-        <h1>Комментарии</h1>
-    </header>
+{% block title %}Комментарии{% endblock %}
 
-    <main class="container my-4">
-        <form id="comment-form" method="post" action="{% url 'add_comment' %}" class="mb-4">
-            {% csrf_token %}
+{% block header %}
+    Комментарии
+{% endblock %}
 
-            <!-- Toolbar for HTML tags -->
-            <div class="toolbar">
-                <button type="button" class="btn btn-outline-secondary" data-tag="<i></i>" onclick="addTag(this.getAttribute('data-tag'))">[i]</button>
-                <button type="button" class="btn btn-outline-secondary" data-tag="<strong></strong>" onclick="addTag(this.getAttribute('data-tag'))">[strong]</button>
-                <button type="button" class="btn btn-outline-secondary" data-tag="<code></code>" onclick="addTag(this.getAttribute('data-tag'))">[code]</button>
-                <button type="button" class="btn btn-outline-secondary" data-tag="<a href=''></a>" onclick="addTag(this.getAttribute('data-tag'))">[a]</button>
-            </div>
+{% block content %}
+    <form id="comment-form" method="post" action="{% url 'add_comment' %}" class="mb-4">
+        {% csrf_token %}
 
-            {{ form.as_p }}
-            <button type="button" class="btn btn-secondary" id="preview-button">Предварительный просмотр</button>
-            <button type="submit" class="btn btn-success">Добавить комментарий</button>
-        </form>
-        <hr>
-        <h2>Список комментариев</h2>
-        <div id="preview-section" class="mb-4"></div> <!-- Секция для предварительного просмотра -->
-
-        <!-- Comments table -->
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th class="sortable" data-sort-by="username" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">User Name</th>
-                    <th class="sortable" data-sort-by="email" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">E-mail</th>
-                    <th class="sortable" data-sort-by="created_at" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for comment in comments %}
-                    <tr>
-                        <td>{{ comment.username|escape }}</td>
-                        <td>{{ comment.email|escape }}</td>
-                        <td>{{ comment.created_at }}</td>
-                        <td>
-                            <!-- Button to toggle reply form -->
-                            <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <!-- Рекурсивное отображение комментариев -->
-        <div id="comments">
-            {% for comment in comments %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ comment.username|escape }}</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ comment.email|escape }}</h6>
-                        <p class="card-text">{{ comment.text|safe }}</p>
-                        <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created_at }}</cite></footer>
-
-                        <!-- Кнопка для отображения формы ответа -->
-                        <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
-
-                        <!-- Форма для добавления ответа -->
-                        <div id="reply-form-{{ comment.id }}" class="reply-form mt-3">
-                            <form method="post" action="{% url 'add_reply' comment.id %}">
-                                {% csrf_token %}
-                                {{ form.as_p }}
-                                <button type="submit" class="btn btn-primary">Отправить</button>
-                            </form>
-                        </div>
-
-                        <!-- Рекурсивное отображение ответов -->
-                        <div class="mt-3">
-                            {% include 'comments/replies.html' with replies=comment.replies.all %}
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+        <!-- Toolbar for HTML tags -->
+        <div class="toolbar">
+            <button type="button" class="btn btn-outline-secondary" data-tag="<i></i>" onclick="addTag(this.getAttribute('data-tag'))">[i]</button>
+            <button type="button" class="btn btn-outline-secondary" data-tag="<strong></strong>" onclick="addTag(this.getAttribute('data-tag'))">[strong]</button>
+            <button type="button" class="btn btn-outline-secondary" data-tag="<code></code>" onclick="addTag(this.getAttribute('data-tag'))">[code]</button>
+            <button type="button" class="btn btn-outline-secondary" data-tag="<a href=''></a>" onclick="addTag(this.getAttribute('data-tag'))">[a]</button>
         </div>
 
-        <!-- Pagination -->
-        <nav aria-label="Page navigation">
-            <ul class="pagination">
-                {% if comments.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page=1&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Первая</a></li>
-                    <li class="page-item"><a class="page-link" href="?page={{ comments.previous_page_number }}&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Предыдущая</a></li>
-                {% endif %}
+        {{ form.as_p }}
+        <button type="button" class="btn btn-secondary" id="preview-button">Предварительный просмотр</button>
+        <button type="submit" class="btn btn-success">Добавить комментарий</button>
+    </form>
+    <hr>
+    <h2>Список комментариев</h2>
+    <div id="preview-section" class="mb-4"></div> <!-- Секция для предварительного просмотра -->
 
-                <li class="page-item disabled"><span class="page-link">Страница {{ comments.number }} из {{ comments.paginator.num_pages }}</span></li>
+    <!-- Comments table -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="sortable" data-sort-by="username" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">User Name</th>
+                <th class="sortable" data-sort-by="email" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">E-mail</th>
+                <th class="sortable" data-sort-by="created_at" data-current-order="{{ request.GET.order|default:'desc' }}" onclick="sortTable(this)">Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for comment in comments %}
+                <tr>
+                    <td>{{ comment.username|escape }}</td>
+                    <td>{{ comment.email|escape }}</td>
+                    <td>{{ comment.created_at }}</td>
+                    <td>
+                        <!-- Button to toggle reply form -->
+                        <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-                {% if comments.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page={{ comments.next_page_number }}&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Следующая</a></li>
-                    <li class="page-item"><a class="page-link" href="?page={{ comments.paginator.num_pages }}&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Последняя</a></li>
-                {% endif %}
-            </ul>
-        </nav>
+    <!-- Рекурсивное отображение комментариев -->
+    <div id="comments">
+        {% for comment in comments %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ comment.username|escape }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ comment.email|escape }}</h6>
+                    <p class="card-text">{{ comment.text|safe }}</p>
+                    <footer class="blockquote-footer"><cite title="Source Title">{{ comment.created_at }}</cite></footer>
 
-        <!-- Bootstrap JS -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+                    <!-- Кнопка для отображения формы ответа -->
+                    <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ comment.id }}')">Ответить</button>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const previewButton = document.getElementById('preview-button');
-                const commentForm = document.getElementById('comment-form');
-                const previewSection = document.getElementById('preview-section');
+                    <!-- Форма для добавления ответа -->
+                    <div id="reply-form-{{ comment.id }}" class="reply-form mt-3">
+                        <form method="post" action="{% url 'add_reply' comment.id %}">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <button type="submit" class="btn btn-primary">Отправить</button>
+                        </form>
+                    </div>
 
-                previewButton.addEventListener('click', function() {
-                    const formData = new FormData(commentForm);
-                    fetch('{% url "preview_comment" %}', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        previewSection.innerHTML = data.preview;
-                    })
-                    .catch(error => console.error('Error:', error));
-                });
-            });
+                    <!-- Рекурсивное отображение ответов -->
+                    <div class="mt-3">
+                        {% include 'comments/replies.html' with replies=comment.replies.all %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 
-            function toggleReplyForm(commentId) {
-                const form = document.getElementById(`reply-form-${commentId}`);
-                form.style.display = form.style.display === 'none' ? 'block' : 'none';
-            }
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            {% if comments.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Первая</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ comments.previous_page_number }}&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Предыдущая</a></li>
+            {% endif %}
 
-            function sortTable(th) {
-                const sortBy = th.getAttribute('data-sort-by');
-                let currentOrder = th.getAttribute('data-current-order');
-                currentOrder = currentOrder === 'asc' ? 'desc' : 'asc';
-                const url = new URL(window.location.href);
-                url.searchParams.set('sort_by', sortBy);
-                url.searchParams.set('order', currentOrder);
-                window.location.href = url.toString();
-            }
+            <li class="page-item disabled"><span class="page-link">Страница {{ comments.number }} из {{ comments.paginator.num_pages }}</span></li>
 
-            function addTag(tag) {
-                const textarea = document.getElementById('id_text');
-                const startPos = textarea.selectionStart;
-                const endPos = textarea.selectionEnd;
-                const text = textarea.value;
-                const before = text.substring(0, startPos);
-                const after = text.substring(endPos, text.length);
-                textarea.value = `${before}${tag}${after}`;
-                textarea.setSelectionRange(startPos + tag.length / 2, startPos + tag.length / 2);
-                textarea.focus();
-            }
-        </script>
-    </main>
-</body>
-</html>
+            {% if comments.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ comments.next_page_number }}&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Следующая</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ comments.paginator.num_pages }}&sort_by={{ request.GET.sort_by }}&order={{ request.GET.order }}">Последняя</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endblock %}
