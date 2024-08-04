@@ -19,3 +19,31 @@ Follow these steps to set up and run the project:
 ```bash
 git clone https://github.com/yourusername/yourproject.git
 cd yourproject
+
+
+2. Set Up a Virtual Environment
+
+Create and activate a virtual environment
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# On Windows
+venv\Scripts\activate
+# On macOS/Linux
+source venv/bin/activate
+3. Install Dependencies
+pip install -r requirements.txt
+4. Configure the Database
+In my project i used mysql
+
+5. Apply Migrations
+
+Create and apply database migrations:
+
+bash
+
+python manage.py makemigrations
+python manage.py migrate
+
+python manage.py runserver
