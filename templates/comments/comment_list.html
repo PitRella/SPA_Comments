@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-    <form id="comment-form" method="post" action="{% url 'add_comment' %}" class="mb-4">
+    <form id="comment-form" method="post" enctype="multipart/form-data" action="{% url 'add_comment' %}" class="mb-4">
         {% csrf_token %}
 
         <!-- Toolbar for HTML tags -->
