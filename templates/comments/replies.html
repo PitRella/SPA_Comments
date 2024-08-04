@@ -1,35 +1,41 @@
 {% for reply in replies %}
+    <!-- Display each reply in a card format -->
     <div class="card mt-3">
         <div class="card-body">
+            <!-- Display the username of the reply author -->
             <h5 class="card-title">{{ reply.username|escape }}</h5>
+            <!-- Display the email of the reply author -->
             <h6 class="card-subtitle mb-2 text-muted">{{ reply.email|escape }}</h6>
+            <!-- Display the text of the reply with HTML tags rendered safely -->
             <p class="card-text">{{ reply.text|safe }}</p>
             {% if reply.image %}
-                <!-- Используйте ссылку с атрибутом data-lightbox для активации Lightbox2 -->
+                <!-- Use a Lightbox link for any images attached to the reply -->
                 <a href="{{ reply.image.url }}" data-lightbox="reply-images" data-title="Reply from {{ reply.username }}">
                     <img src="{{ reply.image.url }}" alt="Reply image" class="img-fluid mb-3" style="max-width: 100%; max-height: 240px;" />
                 </a>
             {% endif %}
+            <!-- Display the creation date of the reply -->
             <footer class="blockquote-footer"><cite title="Source Title">{{ reply.created_at }}</cite></footer>
             
-            <!-- Кнопка для отображения формы ответа -->
+            <!-- Button to toggle the reply form for this specific reply -->
             <button type="button" class="btn btn-primary" onclick="toggleReplyForm('{{ reply.id }}')">Ответить</button>
 
-            <!-- Форма для добавления ответа -->
+            <!-- Form for adding a reply to the current reply -->
             <div id="reply-form-{{ reply.id }}" class="reply-form mt-3">
                 <form method="post" enctype="multipart/form-data" action="{% url 'add_reply' reply.id %}">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Отправить</button>
+                    {% csrf_token %} <!-- CSRF token for form protection -->
+                    {{ form.as_p }} <!-- Render the reply form fields -->
+                    <button type="submit" class="btn btn-primary">Отправить</button> <!-- Button to submit the reply -->
                 </form>
             </div>
 
-            <!-- Рекурсивное отображение ответов -->
+            <!-- Recursive inclusion of replies to this reply -->
             <div class="mt-3">
                 {% include 'comments/replies.html' with replies=reply.replies.all %}
             </div>
         </div>
     </div>
 {% empty %}
+    <!-- Message displayed when there are no replies -->
     <p>Нет ответов</p>
 {% endfor %}

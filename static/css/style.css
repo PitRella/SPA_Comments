@@ -1,9 +1,9 @@
-/* Общие стили для страницы */
+/* General styles for the page */
 body {
     font-family: Arial, sans-serif;
 }
 
-/* Стили для заголовка */
+/* Styles for the header */
 header {
     background-color: #007bff;
     color: white;
@@ -11,17 +11,17 @@ header {
     padding: 1rem;
 }
 
-/* Стили для основной части */
+/* Styles for the main section */
 main {
     padding: 1rem;
 }
 
-/* Стили для формы */
+/* Styles for the form */
 form {
     margin-bottom: 1.5rem;
 }
 
-/* Стили для кнопок инструментов */
+/* Styles for toolbar buttons */
 .toolbar {
     margin-bottom: 1rem;
 }
@@ -30,12 +30,12 @@ form {
     margin-right: 0.5rem;
 }
 
-/* Стили для формы ответа */
+/* Styles for the reply form */
 .reply-form {
     display: none;
 }
 
-/* Стили для таблицы */
+/* Styles for the table */
 .table {
     margin-bottom: 1rem;
 }
@@ -44,12 +44,12 @@ form {
     cursor: pointer;
 }
 
-/* Стили для пагинации */
+/* Styles for pagination */
 .pagination {
     justify-content: center;
 }
 
-/* Стили для кнопки "перейти к началу" */
+/* Styles for the "go to top" button */
 #go-to-top-btn {
     position: fixed;
     bottom: 20px;
@@ -68,4 +68,16 @@ form {
 
 #go-to-top-btn ion-icon {
     font-size: 24px;
+}
+
+/* Styles for images */
+img {
+    transition: all 0.3s ease; /* Smooth transition for all changes */
+    border-radius: 8px; /* Rounded corners */
+}
+
+/* Border for images on hover */
+img:hover {
+    border: 5px solid #007bff; /* Border width and color */
+    box-shadow: 0 0 15px rgba(0, 123, 255, 0.5); /* Shadow to enhance the effect */
 }
